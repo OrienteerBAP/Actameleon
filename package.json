@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "cp CNAME dist/",
     "preview": "vite preview",
     "parse": "node parse_regexp.js",
     "deploy": "gh-pages -d dist"
