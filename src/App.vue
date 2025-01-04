@@ -14,16 +14,28 @@ const safeJSONparse = (str) => {
 const selectedActors = ref(safeJSONparse(localStorage.getItem('selectedActors')) || []);
 const selectedActs = ref(safeJSONparse(localStorage.getItem('selectedActs')) || []);
 const selectedScenes = ref(safeJSONparse(localStorage.getItem('selectedScenes')) || []);
-const showLinesPrior = ref(safeJSONparse(localStorage.getItem('showLinesPrior')) || true);
+const showLinesPrior = ref(safeJSONparse(localStorage.getItem('showLinesPrior')) || false);
 
 const markActive = (script) => {
   script.acts.forEach(act => {
     act.active = selectedActs.value.length == 0 ? true : selectedActs.value.includes(act.actNumber);
     act.scenes.forEach(scene => {
       scene.active = selectedScenes.value.length == 0 ? true : selectedScenes.value.includes(scene.sceneNumber);
-      scene.lines.forEach(line => {
-        line.active = selectedActors.value.length == 0 ? true : selectedActors.value.includes(line.actor);
-      });
+
+      for (let i = 0; i < scene.lines.length; i++) {
+        const line = scene.lines[i];
+        if (selectedActors.value.length == 0) {
+          line.active = true;
+        } else {
+          line.active = selectedActors.value.includes(line.actor);
+          if (showLinesPrior.value && line.active) {
+            for (let j = i - 1; j >= 0; j--) {
+              scene.lines[j].active = true;
+              if (scene.lines[j].actor) break;
+            }
+          }
+        }
+      }
     });
   });
   return script;
@@ -31,7 +43,7 @@ const markActive = (script) => {
 
 const script = reactive(markActive(scriptData));
 
-watch([selectedActors, selectedActs, selectedScenes], () => { markActive(script) });
+watch([selectedActors, selectedActs, selectedScenes, showLinesPrior], () => { markActive(script) });
 
 watch(selectedActors, (newVal) => {
   localStorage.setItem('selectedActors', JSON.stringify(newVal));
