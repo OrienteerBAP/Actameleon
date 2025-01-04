@@ -24,6 +24,9 @@ function parseMarkdownToJSON(mdContent) {
     line = line.trim();
     if(line.startsWith('# ')) {
         if (currentAct) {
+            if (currentScene) {
+              currentAct.scenes.push(currentScene);
+            }
             jsonResult.acts.push(currentAct);
             currentScene = null;
         }

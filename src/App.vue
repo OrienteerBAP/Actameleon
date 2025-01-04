@@ -1,51 +1,44 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, reactive } from 'vue';
 import ScriptDisplay from './components/ScriptDisplay.vue';
 import scriptData from './assets/fools.json';
 
-const script = scriptData;
-
-const selectedActors = ref(JSON.parse(localStorage.getItem('selectedActors')) || []);
-const selectedActs = ref(localStorage.getItem('selectedActs') || []);
-const selectedScenes = ref(JSON.parse(localStorage.getItem('selectedScenes')) || []);
-const showLinesPrior = ref(JSON.parse(localStorage.getItem('showLinesPrior')) || true);
-
-const filteredScript = computed(() => {
-  let filteredActs = script.acts;
-
-  if (selectedActs.value.length > 0) {
-    filteredActs = filteredActs.filter(act => selectedActs.value.includes(act.actNumber));
+const safeJSONparse = (str) => {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return null;
   }
+};
 
-  if (selectedScenes.value.length > 0) {
-    filteredActs = filteredActs.map(act => ({
-      ...act,
-      scenes: act.scenes.filter(scene => selectedScenes.value.includes(scene.sceneNumber))
-    }));
-  }
+const selectedActors = ref(safeJSONparse(localStorage.getItem('selectedActors')) || []);
+const selectedActs = ref(safeJSONparse(localStorage.getItem('selectedActs')) || []);
+const selectedScenes = ref(safeJSONparse(localStorage.getItem('selectedScenes')) || []);
+const showLinesPrior = ref(safeJSONparse(localStorage.getItem('showLinesPrior')) || true);
 
-  if (selectedActors.value.length > 0) {
-    filteredActs = filteredActs.map(act => ({
-      ...act,
-      scenes: act.scenes.map(scene => ({
-        ...scene,
-        lines: scene.lines.filter(line => selectedActors.value.includes(line.actor))
-      }))
-    }));
-  }
+const markActive = (script) => {
+  script.acts.forEach(act => {
+    act.active = selectedActs.value.length == 0 ? true : selectedActs.value.includes(act.actNumber);
+    act.scenes.forEach(scene => {
+      scene.active = selectedScenes.value.length == 0 ? true : selectedScenes.value.includes(scene.sceneNumber);
+      scene.lines.forEach(line => {
+        line.active = selectedActors.value.length == 0 ? true : selectedActors.value.includes(line.actor);
+      });
+    });
+  });
+  return script;
+};
 
-  return {
-    ...script,
-    acts: filteredActs
-  };
-});
+const script = reactive(markActive(scriptData));
+
+watch([selectedActors, selectedActs, selectedScenes], () => { markActive(script) });
 
 watch(selectedActors, (newVal) => {
   localStorage.setItem('selectedActors', JSON.stringify(newVal));
 });
 
 watch(selectedActs, (newVal) => {
-  localStorage.setItem('selectedActs', newVal);
+  localStorage.setItem('selectedActs', JSON.stringify(newVal));
 });
 
 watch(selectedScenes, (newVal) => {
@@ -81,7 +74,7 @@ watch(showLinesPrior, (newVal) => {
       <label class="block mb-2">Show Lines Prior to Selected Actors:</label>
       <input type="checkbox" v-model="showLinesPrior" class="block" />
     </div>
-    <ScriptDisplay :script="filteredScript" v-if="script" />
+    <ScriptDisplay :script="script" v-if="script" v-cloak/>
   </div>
 </template>
 
