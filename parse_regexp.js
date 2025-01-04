@@ -14,6 +14,11 @@ function parseMarkdownToJSON(mdContent) {
     acts: []
   };
 
+  function unescapeMarkdown(text) {
+    return text
+      .replace(/\\([\\`*_{}[\]()#+\-.!])/g, '$1'); // Unescape common markdown characters
+  }
+
   let currentAct = null;
   let currentScene = null;
   let actNumber = 1;
@@ -21,7 +26,7 @@ function parseMarkdownToJSON(mdContent) {
   let lastActor = null;
 
   lines.forEach(line => {
-    line = line.trim();
+    line = unescapeMarkdown(line.trim());
     if(line.startsWith('# ')) {
         if (currentAct) {
             if (currentScene) {
