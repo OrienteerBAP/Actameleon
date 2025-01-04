@@ -1,6 +1,6 @@
 <template>
-  <div class="flex items-start mb-2">
-    <strong class="mr-2" v-if="line.actor" >{{ line.actor }}:</strong>
+  <div class="flex flex-col sm:flex-row items-start mb-2">
+    <strong class="mr-2" v-if="line.actor">{{ line.actor }}:</strong>
     <span v-if="line.setting" class="italic mr-2">{{ line.setting }}</span>
     <span>{{ line.text }}</span>
   </div>
