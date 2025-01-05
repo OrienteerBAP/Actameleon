@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, computed } from 'vue';
 import ScriptDisplay from './components/ScriptDisplay.vue';
 import scriptData from './assets/fools.json';
 
@@ -43,6 +43,20 @@ const markActive = (script) => {
 };
 
 const script = reactive(markActive(scriptData));
+
+const actors = computed(() => {
+  const actorsList = script.acts.flatMap(act => act.scenes.flatMap(scene => scene.lines.map(line => line.actor)));
+  const frequencyMap = actorsList.reduce((acc, actor) => {
+    acc[actor] = (acc[actor] || 0) + 1;
+    return acc;
+  }, {});
+  const actors =  Object.keys(frequencyMap).sort((a, b) => frequencyMap[b] - frequencyMap[a]);
+  const undefinedIndex = actors.indexOf("undefined");
+  if(undefinedIndex > -1) actors.splice(undefinedIndex, 1, undefined);
+  return actors;
+  //[...new Set(script.acts.flatMap(act => act.scenes.flatMap(scene => scene.lines.map(line => line.actor)))]
+
+});
 
 watch([selectedActors, selectedActs, selectedScenes, showLinesPrior, hideText], 
       () => {
@@ -134,7 +148,7 @@ const readIt = () => {
     <div class="mb-4">
       <label class="block mb-2">Select Actors:</label>
       <select v-model="selectedActors" multiple class="block w-full p-2 border rounded">
-        <option v-for="actor in [...new Set(script.acts.flatMap(act => act.scenes.flatMap(scene => scene.lines.map(line => line.actor))))]" :key="actor" :value="actor">{{ actor ? actor : "**Settings**" }}</option>
+        <option v-for="actor in actors" :key="actor" :value="actor">{{ actor ? actor : "**Settings**" }}</option>
       </select>
     </div>
     <div class="mb-4">
