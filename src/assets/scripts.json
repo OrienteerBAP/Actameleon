@@ -1,0 +1,12 @@
+[
+    {
+        "name": "fools",
+        "title": "Дураки",
+        "url": "/scripts/fools.json"
+    },
+    {
+        "name": "festival",
+        "title": "Фестиваль",
+        "url": "/scripts/festival.json"
+    }
+]

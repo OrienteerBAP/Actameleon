@@ -13,6 +13,7 @@ const props = defineProps({
 });
 
 const actors = computed(() => {
+  if(!props.script.acts) return [];
   const actorsList = props.script.acts.flatMap(act => act.scenes.flatMap(scene => scene.lines.map(line => line.actor)));
   const frequencyMap = actorsList.reduce((acc, actor) => {
     acc[actor] = (acc[actor] || 0) + 1;
@@ -29,7 +30,7 @@ const actors = computed(() => {
 </script>
 
 <template>
-  <div class="full-width">
+  <div class="full-width" v-if="script.acts">
     <div class="mb-4">
       <label class="block mb-2">Select Actors:</label>
       <select v-model="config.selectedActors" multiple class="block w-full p-2 border rounded">

@@ -2,8 +2,7 @@
 import { ref, reactive, watch, computed } from 'vue';
 import ConfigPanel from './components/ConfigPanel.vue';
 import ScriptDisplay from './components/ScriptDisplay.vue';
-import scriptData from './assets/fools.json';
-//import scriptData from './assets/festival.json';
+import scripts from './assets/scripts.json';
 
 const safeJSONparse = (str) => {
   try {
@@ -13,7 +12,9 @@ const safeJSONparse = (str) => {
   }
 };
 
-const config = reactive(safeJSONparse(localStorage.getItem('config')) 
+const selectedScript = ref(safeJSONparse(localStorage.getItem('script')) || 'fools');
+
+const config = reactive(safeJSONparse(localStorage.getItem(`config.${selectedScript.value}`)) 
                   || {
                     selectedActors: [],
                     selectedActs: [],
@@ -47,12 +48,51 @@ const markActive = (script) => {
   return script;
 };
 
-const script = reactive(markActive(scriptData));
+const script = reactive({});
+
+const loadScript = async (url) => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    Object.assign(script, data);
+    markActive(script);
+  } catch (error) {
+    console.error('Failed to load script data:', error);
+  }
+};
+
+const loadSelectedScript = async () => {
+  let scriptRef = scripts.find(s => s.name === selectedScript.value);
+  if(!scriptRef) {
+    scriptRef = scripts[0];
+    selectedScript.value = scriptRef.name;
+  }
+  await loadScript(scriptRef.url);
+  const newConfig = safeJSONparse(localStorage.getItem(`config.${selectedScript.value}`)) 
+                          || {
+                            selectedActors: [],
+                            selectedActs: [],
+                            selectedScenes: [],
+                            showLinesPrior: false,
+                            hideText: false
+                          };
+  Object.assign(config, newConfig);
+}
+
+
+watch(selectedScript, (newVal) => {
+  if(typeof(newVal) == 'undefined') newVal = scripts[0];
+  localStorage.setItem('script', JSON.stringify(newVal));
+  loadSelectedScript();
+}, { immediate: true });
 
 watch(config, (newVal) => {
   markActive(script);
   if(speachSynthesisSupported)speechSynthesis.cancel(); 
-  localStorage.setItem('config', JSON.stringify(newVal));
+  localStorage.setItem(`config.${selectedScript.value}`, JSON.stringify(newVal));
 });
 
 const scrollToTop = () => {
@@ -116,7 +156,12 @@ const readIt = () => {
 
 <template>
   <div id="app" class="container mx-auto p-4">
-
+    <div class="mb-4">
+      <label class="block mb-2">Select Script:</label>
+      <select v-model="selectedScript" class="block w-full p-2 border rounded">
+        <option v-for="s in scripts" :key="s.name" :value="s.name">{{ s.title }}</option>
+      </select>
+    </div>
     <ConfigPanel :script="script" :config="config" />
 
     <ScriptDisplay :script="script" :hide-to-check="config.hideText" v-if="script" v-cloak/>
