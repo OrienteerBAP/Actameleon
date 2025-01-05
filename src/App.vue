@@ -30,7 +30,7 @@ const markActive = (script) => {
           line.state = selectedActors.value.includes(line.actor) ? "show" : "hide";
           if (showLinesPrior.value && line.state == "show") {
             for (let j = i - 1; j >= 0; j--) {
-              scene.lines[j].state = "clue";
+              if (scene.lines[j].state == 'hide') scene.lines[j].state = "clue";
               if (scene.lines[j].actor) break;
             }
           }
