@@ -1,0 +1,59 @@
+{
+    "playTitle": "Chameleon Tales",
+    "author": "John Doe",
+    "description": "A play about the transformations of life.",
+    "acts": [
+      {
+        "actNumber": 1,
+        "actTitle": "The Beginning",
+        "scenes": [
+          {
+            "sceneNumber": 1,
+            "sceneTitle": "Opening Scene",
+            "setting": "A quiet village at sunrise.",
+            "lines": [
+              {
+                "actor": "Narrator",
+                "text": "Once upon a time, in a tranquil village...",
+                "stageDirections": "Narrator walks center stage."
+              },
+              {
+                "actor": "Alice",
+                "text": "Look, the sun is rising!",
+                "stageDirections": "Points towards the sky.",
+                "cues": ["Bob enters from left."]
+              },
+              {
+                "actor": "Bob",
+                "text": "It’s a beautiful morning indeed.",
+                "stageDirections": "Smiles warmly."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "actNumber": 2,
+        "actTitle": "The Transformation",
+        "scenes": [
+          {
+            "sceneNumber": 1,
+            "sceneTitle": "The Turning Point",
+            "setting": "A bustling city.",
+            "lines": [
+              {
+                "actor": "Alice",
+                "text": "Everything is so different here.",
+                "stageDirections": "Looks around in awe."
+              },
+              {
+                "actor": "Bob",
+                "text": "Change is inevitable, my friend.",
+                "stageDirections": "Places a hand on Alice’s shoulder."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
