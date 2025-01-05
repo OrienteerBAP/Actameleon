@@ -78,6 +78,27 @@ const speachSynthesisSupported = 'speechSynthesis' in window && 'SpeechSynthesis
 
 const speaking = ref(false);
 
+let wakeLock = null;
+
+const requestWakeLock = async () => {
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => {
+      console.log('Wake lock was released');
+    });
+    console.log('Wake lock is active');
+  } catch (err) {
+    console.error(`${err.name}, ${err.message}`);
+  }
+};
+
+const releaseWakeLock = () => {
+  if (wakeLock !== null) {
+    wakeLock.release();
+    wakeLock = null;
+  }
+};
+
 const readIt = () => {
   if(speaking.value) {
     speechSynthesis.cancel();
@@ -93,11 +114,16 @@ const readIt = () => {
       .filter(line => line.state === 'show' || line.state === 'clue')
       .map(line => line.text)
       .join(' ');
+
+    requestWakeLock();
+
     const utterance = new SpeechSynthesisUtterance(textToRead);
-    console.log(script.language);
     utterance.lang = script.language;
     utterance.onstart = () => speaking.value = true;
-    utterance.onend = () => speaking.value = false;
+    utterance.onend = () => {
+      speaking.value = false;
+      releaseWakeLock();
+    };
     speechSynthesis.speak(utterance);
   }
 };
