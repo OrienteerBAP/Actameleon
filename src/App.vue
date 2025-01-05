@@ -15,6 +15,7 @@ const selectedActors = ref(safeJSONparse(localStorage.getItem('selectedActors'))
 const selectedActs = ref(safeJSONparse(localStorage.getItem('selectedActs')) || []);
 const selectedScenes = ref(safeJSONparse(localStorage.getItem('selectedScenes')) || []);
 const showLinesPrior = ref(safeJSONparse(localStorage.getItem('showLinesPrior')) || false);
+const hideText = ref(safeJSONparse(localStorage.getItem('hideText')) || false);
 
 const markActive = (script) => {
   script.acts.forEach(act => {
@@ -43,7 +44,7 @@ const markActive = (script) => {
 
 const script = reactive(markActive(scriptData));
 
-watch([selectedActors, selectedActs, selectedScenes, showLinesPrior], () => { markActive(script) });
+watch([selectedActors, selectedActs, selectedScenes, showLinesPrior, hideText], () => { markActive(script) });
 
 watch(selectedActors, (newVal) => {
   localStorage.setItem('selectedActors', JSON.stringify(newVal));
@@ -59,6 +60,10 @@ watch(selectedScenes, (newVal) => {
 
 watch(showLinesPrior, (newVal) => {
   localStorage.setItem('showLinesPrior', JSON.stringify(newVal));
+});
+
+watch(hideText, (newVal) => {
+  localStorage.setItem('hideText', JSON.stringify(newVal));
 });
 
 const scrollToTop = () => {
@@ -90,7 +95,11 @@ const scrollToTop = () => {
       <label class="block mb-2">Show Lines Prior to Selected Actors:</label>
       <input type="checkbox" v-model="showLinesPrior" class="block" />
     </div>
-    <ScriptDisplay :script="script" v-if="script" v-cloak/>
+    <div class="mb-4">
+      <label class="block mb-2">Hide Text to Check Yourself:</label>
+      <input type="checkbox" v-model="hideText" class="block" />
+    </div>
+    <ScriptDisplay :script="script" :hide-to-check="hideText" v-if="script" v-cloak/>
 
     <!-- Floating button to scroll to top -->
     <button @click="scrollToTop" class="scroll2top">
