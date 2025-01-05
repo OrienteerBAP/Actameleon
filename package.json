@@ -8,7 +8,8 @@
     "build": "vite build",
     "postbuild": "cp CNAME dist/",
     "preview": "vite preview",
-    "parse": "node parse_regexp.js",
+    "parse-fools": "node parse_regexp.js src/assets/fools.md src/assets/fools.json",
+    "parse-festival": "node parse_regexp.js src/assets/festival.md src/assets/festival.json",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {

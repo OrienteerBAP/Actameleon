@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { json } from 'stream/consumers';
 
 const mdFilePath = 'src/assets/fools.md';
 const jsonFilePath = 'src/assets/fools.json';
@@ -90,18 +89,24 @@ function parseMarkdownToJSON(mdContent) {
   return jsonResult;
 }
 
-fs.readFile(mdFilePath, 'utf8', (err, data) => {
-  if (err) {
-    console.error('Error reading markdown file:', err);
-    return;
-  }
+// Get command-line arguments
+const args = process.argv.slice(2);
+const inputFilePath = args[0] || mdFilePath;
+const outputFilePath = args[1] || jsonFilePath;
 
-  const jsonData = parseMarkdownToJSON(data);
-  fs.writeFile(jsonFilePath, JSON.stringify(jsonData, null, 2), 'utf8', err => {
-    if (err) {
-      console.error('Error writing JSON file:', err);
-    } else {
-      console.log('JSON file has been saved.');
-    }
-  });
+console.log(`Reading from ${inputFilePath} and writing to ${outputFilePath}`);
+
+fs.readFile(inputFilePath, 'utf8', (err, data) => {
+  if (err) {
+    console.error(`Error reading file from disk: ${err}`);
+  } else {
+    const jsonData = parseMarkdownToJSON(data);
+    fs.writeFile(outputFilePath, JSON.stringify(jsonData, null, 2), (err) => {
+      if (err) {
+        console.error(`Error writing JSON to file: ${err}`);
+      } else {
+        console.log(`JSON data has been written to ${outputFilePath}`);
+      }
+    });
+  }
 });

@@ -2,6 +2,7 @@
 import { ref, reactive, watch, computed } from 'vue';
 import ScriptDisplay from './components/ScriptDisplay.vue';
 import scriptData from './assets/fools.json';
+//import scriptData from './assets/festival.json';
 
 const safeJSONparse = (str) => {
   try {
