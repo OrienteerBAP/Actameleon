@@ -68,6 +68,21 @@ button:focus-visible {
   text-align: center;
 }
 
+.line-show {
+  @apply flex flex-col sm:flex-row items-start mb-2 text-left;
+}
+
+.line-hide {
+  @apply flex flex-col sm:flex-row items-start mb-2;
+  display: inline;
+}
+
+.line-clue {
+  @apply flex flex-col sm:flex-row items-start mb-2 text-left;
+  color: #646cff;
+}
+
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

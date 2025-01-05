@@ -25,12 +25,12 @@ const markActive = (script) => {
       for (let i = 0; i < scene.lines.length; i++) {
         const line = scene.lines[i];
         if (selectedActors.value.length == 0) {
-          line.active = true;
+          line.state = "show";
         } else {
-          line.active = selectedActors.value.includes(line.actor);
-          if (showLinesPrior.value && line.active) {
+          line.state = selectedActors.value.includes(line.actor) ? "show" : "hide";
+          if (showLinesPrior.value && line.state == "show") {
             for (let j = i - 1; j >= 0; j--) {
-              scene.lines[j].active = true;
+              scene.lines[j].state = "clue";
               if (scene.lines[j].actor) break;
             }
           }
