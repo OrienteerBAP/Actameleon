@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, reactive } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import ScriptDisplay from './components/ScriptDisplay.vue';
 import scriptData from './assets/fools.json';
 
@@ -60,6 +60,10 @@ watch(selectedScenes, (newVal) => {
 watch(showLinesPrior, (newVal) => {
   localStorage.setItem('showLinesPrior', JSON.stringify(newVal));
 });
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 </script>
 
 <template>
@@ -87,6 +91,11 @@ watch(showLinesPrior, (newVal) => {
       <input type="checkbox" v-model="showLinesPrior" class="block" />
     </div>
     <ScriptDisplay :script="script" v-if="script" v-cloak/>
+
+    <!-- Floating button to scroll to top -->
+    <button @click="scrollToTop" class="scroll2top">
+      ↑ Top
+    </button>
   </div>
 </template>
 
