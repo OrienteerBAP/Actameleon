@@ -44,7 +44,11 @@ const markActive = (script) => {
 
 const script = reactive(markActive(scriptData));
 
-watch([selectedActors, selectedActs, selectedScenes, showLinesPrior, hideText], () => { markActive(script) });
+watch([selectedActors, selectedActs, selectedScenes, showLinesPrior, hideText], 
+      () => {
+        markActive(script);
+        if(speachSynthesisSupported)speechSynthesis.cancel(); 
+      });
 
 watch(selectedActors, (newVal) => {
   localStorage.setItem('selectedActors', JSON.stringify(newVal));
@@ -68,6 +72,34 @@ watch(hideText, (newVal) => {
 
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+const speachSynthesisSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+
+const speaking = ref(false);
+
+const readIt = () => {
+  if(speaking.value) {
+    speechSynthesis.cancel();
+    speaking.value = false;
+    return;
+  } else {
+    let textToRead = script.acts.flatMap(act => act.scenes.flatMap(scene => scene.lines.map(line => line.text)).join(' '));
+    textToRead = script.acts
+      .filter(act => act.active)
+      .flatMap(act => act.scenes)
+      .filter(scene => scene.active)
+      .flatMap(scene => scene.lines)
+      .filter(line => line.state === 'show' || line.state === 'clue')
+      .map(line => line.text)
+      .join(' ');
+    const utterance = new SpeechSynthesisUtterance(textToRead);
+    console.log(script.language);
+    utterance.lang = script.language;
+    utterance.onstart = () => speaking.value = true;
+    utterance.onend = () => speaking.value = false;
+    speechSynthesis.speak(utterance);
+  }
 };
 </script>
 
@@ -101,6 +133,10 @@ const scrollToTop = () => {
     </div>
     <ScriptDisplay :script="script" :hide-to-check="hideText" v-if="script" v-cloak/>
 
+    <!-- Floating button to scroll to top -->
+    <button @click="readIt" class="readit" v-if="speachSynthesisSupported">
+      {{ speaking ? "Stop" : "Read This" }}
+    </button>
     <!-- Floating button to scroll to top -->
     <button @click="scrollToTop" class="scroll2top">
       ↑ Top
