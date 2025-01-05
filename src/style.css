@@ -94,9 +94,8 @@ button:focus-visible {
 }
 
 .line-hide {
-  @apply items-start inline;
+  @apply items-start inline-flex;
   background: inherit !important;
-  /**display: inline;**/
 }
 
 .line-clue {
@@ -132,6 +131,10 @@ button:focus-visible {
   }
   button {
     background-color: #1a1a1a;
+  }
+
+  .line-clue {
+    color: #a6aafb;
   }
 
   .scene > :nth-child(even) {

@@ -50,18 +50,23 @@ const markActive = (script) => {
 
 const script = reactive({});
 
-const loadScript = async (url) => {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+const loadScript = async (scriptRef) => {
+  if (!scriptRef) return;
+  if(!scriptRef.script) {
+    try {
+    
+      const response = await fetch(scriptRef.url);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      scriptRef.script = await response.json();
+      
+    } catch (error) {
+      console.error('Failed to load script data:', error);
     }
-    const data = await response.json();
-    Object.assign(script, data);
-    markActive(script);
-  } catch (error) {
-    console.error('Failed to load script data:', error);
   }
+  Object.assign(script, scriptRef.script);
+  markActive(script);
 };
 
 const loadSelectedScript = async () => {
@@ -70,7 +75,7 @@ const loadSelectedScript = async () => {
     scriptRef = scripts[0];
     selectedScript.value = scriptRef.name;
   }
-  await loadScript(scriptRef.url);
+  await loadScript(scriptRef);
   const newConfig = safeJSONparse(localStorage.getItem(`config.${selectedScript.value}`)) 
                           || {
                             selectedActors: [],
