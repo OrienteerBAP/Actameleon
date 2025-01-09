@@ -13,5 +13,10 @@
         "name": "memorialpray",
         "title": "Поминальная Молитва",
         "url": "/scripts/memorialpray.json"
+    },
+    {
+        "name": "twisters",
+        "title": "Скороговорки",
+        "url": "/scripts/twisters.json"
     }
 ]
