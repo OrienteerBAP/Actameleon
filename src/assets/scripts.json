@@ -8,5 +8,10 @@
         "name": "festival",
         "title": "Фестиваль",
         "url": "/scripts/festival.json"
+    },
+    {
+        "name": "memorialpray",
+        "title": "Поминальная Молитва",
+        "url": "/scripts/memorialpray.json"
     }
 ]

@@ -4,6 +4,14 @@ import path from 'path';
 const mdFilePath = 'src/assets/fools.md';
 const jsonFilePath = 'src/assets/fools.json';
 
+const regex = {
+  MARKDOWN_UNSCAPE : /\\([\\`*_{}[\]()#+\-.!])/g,
+  ACT : /^# \**([^\*]*)\**\s{.*}/,
+  SCENE : /^## \**([^\*]*)\**\s{.*}/,
+  LINE : /\s*\*\*(.*?)\*\*\s*(?:\*\(?(.*?)\)?\*\s*)?\.?\s*(.*)/,
+  SETTING : /#*\s*\*(.*)\*/
+}
+
 function parseMarkdownToJSON(mdContent) {
   const lines = mdContent.split('\n');
   const jsonResult = {
@@ -15,7 +23,7 @@ function parseMarkdownToJSON(mdContent) {
 
   function unescapeMarkdown(text) {
     return text
-      .replace(/\\([\\`*_{}[\]()#+\-.!])/g, '$1'); // Unescape common markdown characters
+      .replace(regex.MARKDOWN_UNSCAPE, '$1'); // Unescape common markdown characters
   }
 
   let currentAct = null;
@@ -26,7 +34,8 @@ function parseMarkdownToJSON(mdContent) {
 
   lines.forEach(line => {
     line = unescapeMarkdown(line.trim());
-    if(line.startsWith('# ')) {
+    if (regex.ACT.test(line)) {
+      const match = line.match(regex.ACT);
         if (currentAct) {
             if (currentScene) {
               currentAct.scenes.push(currentScene);
@@ -35,19 +44,20 @@ function parseMarkdownToJSON(mdContent) {
             currentScene = null;
         }
         currentAct = {
-            actTitle: line.replace('# ', ''),
+            actTitle: match[1],
             actNumber: actNumber++,
             scenes: []
         };
         currentScene = null;
         lastActor = null;
     }
-    else if (line.startsWith('## ')) {
+    else if (regex.SCENE.test(line)) {
+        const match = line.match(regex.SCENE);
         if (currentScene) {
             currentAct.scenes.push(currentScene);
         }
         currentScene = {
-            sceneTitle: line.replace('## ', ''),
+            sceneTitle: match[1],
             sceneNumber: sceneNumber++,
             setting: null,
             lines: []
@@ -55,17 +65,21 @@ function parseMarkdownToJSON(mdContent) {
         lastActor = null;
     }
     else if (currentAct && currentScene && line.length > 0) {         
-        const lineMatch = line.match(/\*\*(.*?)\*\*\s*(?:\*\(?(.*?)\)?\*\s*)?\.?\s*(.*)/);
-        const settingMatch = line.match(/\*(.*)\*/);
+        const lineMatch = line.match(regex.LINE);
+        const settingMatch = line.match(regex.SETTING);
         if (lineMatch) {
             const actor = lineMatch[1];
             const setting = lineMatch[2] || null;
             const text = lineMatch[3];
             currentScene.lines.push({ actor, setting, text });
             lastActor = actor;
-        } else if (settingMatch && currentScene.lines.length > 0) {
+        } else if (settingMatch) {
             const setting = settingMatch[1];
-            currentScene.lines.push({ setting });
+            if(currentScene.lines.length === 0) {
+                currentScene.setting = currentScene.setting ? `${currentScene.setting}\n${setting}` : setting;
+            } else {
+                currentScene.lines.push({ setting });
+            }
         } else {
             if (currentScene.lines.length === 0) {
                 currentScene.setting = currentScene.setting ? `${currentScene.setting}\n${line}` : line;

@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "parse-fools": "node parse_regexp.js public/scripts/fools.md public/scripts/fools.json",
     "parse-festival": "node parse_regexp.js public/scripts/festival.md public/scripts/festival.json",
+    "parse-memorialpray": "node parse_regexp.js public/scripts/memorialpray.md public/scripts/memorialpray.json",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {

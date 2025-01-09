@@ -148,7 +148,7 @@ const readIt = () => {
     requestWakeLock();
 
     const utterance = new SpeechSynthesisUtterance(textToRead);
-    utterance.lang = script.language;
+    utterance.lang = script.language ? script.language : 'ru';
     utterance.onstart = () => speaking.value = true;
     utterance.onend = () => {
       speaking.value = false;
