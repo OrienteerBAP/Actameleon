@@ -40,13 +40,13 @@ const actors = computed(() => {
     <div class="mb-4">
       <label class="block mb-2">Select Acts:</label>
       <select v-model="config.selectedActs" multiple class="block w-full p-2 border rounded">
-        <option v-for="act in script.acts" :key="act.actNumber" :value="act.actNumber">Act {{ act.actNumber }}</option>
+        <option v-for="act in script.acts" :key="act.actNumber" :value="act.actNumber">{{ act.actTitle ?? `Act ${act.actNumber}` }}</option>
       </select>
     </div>
     <div class="mb-4">
       <label class="block mb-2">Select Scenes:</label>
       <select v-model="config.selectedScenes" multiple class="block w-full p-2 border rounded">
-        <option v-for="scene in script.acts.flatMap(act => act.scenes)" :key="scene.sceneNumber" :value="scene.sceneNumber">Scene {{ scene.sceneNumber }}</option>
+        <option v-for="scene in script.acts.flatMap(act => act.scenes)" :key="scene.sceneNumber" :value="scene.sceneNumber">{{ scene.sceneTitle ?? `Scene ${scene.sceneNumber }` }}</option>
       </select>
     </div>
     <div class="mb-4">
