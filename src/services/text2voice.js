@@ -47,8 +47,15 @@ const speakNext = () => {
     } else {
         const utterance = new SpeechSynthesisUtterance(line.text);
         utterance.lang = language;
+        utterance.onstart = () => {
+            line.selected = true;
+        }
         utterance.onend = () => {
+            line.selected = false;
             speakNext();
+        }
+        utterance.onerror = () => {
+            line.selected = false;
         }
         speechSynthesis.speak(utterance);
         if(!speaking.value) speaking.value = true;
