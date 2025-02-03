@@ -6,6 +6,10 @@ let wakeLock = null;
 
 let speaking = ref(false);
 
+
+let linesToSpeak = [];
+let language = 'ru';
+
 const requestWakeLock = async () => {
     try {
         wakeLock = await navigator.wakeLock.request('screen');
@@ -25,34 +29,44 @@ const releaseWakeLock = () => {
     }
 };
 
-const readIt = (script) => {
+const toggleReading = (script) => {
     if(!available) return;
-
     if(speaking.value) {
-        speechSynthesis.cancel();
-        speaking.value = false;
-        return;
+        cancel();
     } else {
-        let textToRead = script.acts.flatMap(act => act.scenes.flatMap(scene => scene.lines.map(line => line.text)).join(' '));
-        textToRead = script.acts
+        read(script);
+    }
+}
+
+
+const speakNext = () => {
+    const line = linesToSpeak.shift();
+    if(typeof line === 'undefined' || !speaking.value) {
+        releaseWakeLock();
+        speaking.value = false;
+    } else {
+        const utterance = new SpeechSynthesisUtterance(line.text);
+        utterance.lang = language;
+        utterance.onend = () => {
+            speakNext();
+        }
+        speechSynthesis.speak(utterance);
+        if(!speaking.value) speaking.value = true;
+    }
+}
+
+const read = (script) => {
+    if(available) {
+        linesToSpeak = script.acts
         .filter(act => act.active)
         .flatMap(act => act.scenes)
         .filter(scene => scene.active)
         .flatMap(scene => scene.lines)
-        .filter(line => line.state === 'show' || line.state === 'clue')
-        .map(line => line.text)
-        .join(' ');
-
+        .filter(line => line.state === 'show' || line.state === 'clue');
+        language = script.language ? script.language : 'ru';
+        speaking.value = true;
         requestWakeLock();
-
-        const utterance = new SpeechSynthesisUtterance(textToRead);
-        utterance.lang = script.language ? script.language : 'ru';
-        utterance.onstart = () => speaking.value = true;
-        utterance.onend = () => {
-        speaking.value = false;
-        releaseWakeLock();
-        };
-        speechSynthesis.speak(utterance);
+        speakNext();
     }
 };
 
@@ -68,6 +82,7 @@ const cancel = () => {
 export default {
     available,
     speaking,
-    readIt,
+    toggleReading,
+    read,
     cancel
 }

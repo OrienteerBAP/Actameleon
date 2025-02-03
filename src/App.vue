@@ -119,7 +119,7 @@ const scrollToTop = () => {
     <ScriptDisplay :script="script" :hide-to-check="config.hideText" v-if="script" v-cloak/>
 
     <!-- Floating button to scroll to top -->
-    <button @click="t2v.readIt(script)" class="readit" v-if="t2v.available">
+    <button @click="t2v.toggleReading(script)" class="readit" v-if="t2v.available">
       {{ t2v.speaking.value ? "Stop" : "Read This" }}
     </button>
     <!-- Floating button to scroll to top -->
