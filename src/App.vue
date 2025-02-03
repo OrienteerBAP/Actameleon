@@ -3,6 +3,7 @@ import { ref, reactive, watch, computed } from 'vue';
 import ConfigPanel from './components/ConfigPanel.vue';
 import ScriptDisplay from './components/ScriptDisplay.vue';
 import scripts from './assets/scripts.json';
+import t2v from './services/text2voice.js';
 
 const safeJSONparse = (str) => {
   try {
@@ -96,66 +97,12 @@ watch(selectedScript, (newVal) => {
 
 watch(config, (newVal) => {
   markActive(script);
-  if(speachSynthesisSupported)speechSynthesis.cancel(); 
+  t2v.cancel();
   localStorage.setItem(`config.${selectedScript.value}`, JSON.stringify(newVal));
 });
 
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-const speachSynthesisSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
-
-const speaking = ref(false);
-
-let wakeLock = null;
-
-const requestWakeLock = async () => {
-  try {
-    wakeLock = await navigator.wakeLock.request('screen');
-    wakeLock.addEventListener('release', () => {
-      console.log('Wake lock was released');
-    });
-    console.log('Wake lock is active');
-  } catch (err) {
-    console.error(`${err.name}, ${err.message}`);
-  }
-};
-
-const releaseWakeLock = () => {
-  if (wakeLock !== null) {
-    wakeLock.release();
-    wakeLock = null;
-  }
-};
-
-const readIt = () => {
-  if(speaking.value) {
-    speechSynthesis.cancel();
-    speaking.value = false;
-    return;
-  } else {
-    let textToRead = script.acts.flatMap(act => act.scenes.flatMap(scene => scene.lines.map(line => line.text)).join(' '));
-    textToRead = script.acts
-      .filter(act => act.active)
-      .flatMap(act => act.scenes)
-      .filter(scene => scene.active)
-      .flatMap(scene => scene.lines)
-      .filter(line => line.state === 'show' || line.state === 'clue')
-      .map(line => line.text)
-      .join(' ');
-
-    requestWakeLock();
-
-    const utterance = new SpeechSynthesisUtterance(textToRead);
-    utterance.lang = script.language ? script.language : 'ru';
-    utterance.onstart = () => speaking.value = true;
-    utterance.onend = () => {
-      speaking.value = false;
-      releaseWakeLock();
-    };
-    speechSynthesis.speak(utterance);
-  }
 };
 </script>
 
@@ -172,8 +119,8 @@ const readIt = () => {
     <ScriptDisplay :script="script" :hide-to-check="config.hideText" v-if="script" v-cloak/>
 
     <!-- Floating button to scroll to top -->
-    <button @click="readIt" class="readit" v-if="speachSynthesisSupported">
-      {{ speaking ? "Stop" : "Read This" }}
+    <button @click="t2v.readIt(script)" class="readit" v-if="t2v.available">
+      {{ t2v.speaking.value ? "Stop" : "Read This" }}
     </button>
     <!-- Floating button to scroll to top -->
     <button @click="scrollToTop" class="scroll2top">
